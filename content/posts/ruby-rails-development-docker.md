@@ -7,6 +7,8 @@ canonical_url: false
 description: "You may see an app you worked on months ago, but you don’t remember what it was about. Then you run into trouble trying to start it again because you have moved on to a new version of Rails. And probably a new version of Ruby too. One way to get around this version issue and save your sanity down the road: Use Docker."
 ---
 
+**Updated February, 2020, to include newer versions of Ruby, Rails, and Node.**
+
 There’s a terrific book called [Practicing Rails](https://www.justinweiss.com/practicing-rails/), by Justin Weiss. One of the key concepts that really stuck with me is creating many small apps to test and experiment with new features and ideas. There’s just one potential headache that you may encounter: you end up with, over time, a whole bunch of apps using different versions of [Ruby on Rails](https://rubyonrails.org/) and/or [Ruby](https://www.ruby-lang.org/).
 
 You may see an app you worked on months ago, but you don’t remember what it was about. Then you run into trouble trying to start it again because you have moved on to a new version of Rails. And probably a new version of Ruby too. One way to get around this version issue and save your sanity down the road: Use [Docker](https://www.docker.com/).
@@ -59,12 +61,12 @@ The Ruby image we used got us started. But we need to actually build the image -
 **Create a Dockerfile**. Here is a good starter one:
 
 ```
-FROM ruby:2.4
+FROM ruby:2.7
 LABEL maintainer="your-email-goes-here"
 
 # Ensure we install an up-to-date version of Node
 # See https://github.com/yarnpkg/yarn/issues/2888
-RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_13.x | bash -
 
 # Ensure latest packages for Yarn
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
