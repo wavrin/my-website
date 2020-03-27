@@ -5,7 +5,7 @@
     </a>
     <div class="content">
       <h1>Tools</h1>
-      <p>(last updated: January, 2020)</p>
+      <p>(last updated: March, 2020)</p>
 
       <h3>Editor, Terminal, and Software</h3>
       <ul>
@@ -27,16 +27,19 @@
         </li>
         <li>
           <a href="https://iterm2.com/">iTerm2</a> with
-          <a href="https://github.com/wesbos/Cobalt2-iterm">Cobalt2</a> theme
+          <a href="https://github.com/jsit/night-owl-iterm2-theme">Night Owl</a> theme
           and
           <a href="https://dank.sh/">Dank Mono</a> font.
         </li>
         <li>
-          <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox browser</a>, mostly.
+          <a href="https://brave.com/">Brave browser</a>, mostly.
         </li>
         <li>
           <a href="https://culturedcode.com/things/">Things</a> app to keep
           track of all to-dos.
+        </li>
+        <li>
+          <a href="https://www.notion.so/">Notion</a> for documentation and organization.
         </li>
         <li>
           <a href="https://sparkmailapp.com/">Spark</a> for email.
