@@ -21,7 +21,9 @@ We’ll need to install [Docker Desktop](https://www.docker.com/products/docker-
 
 **Start bash in a new container:**
 
-`docker run -it --rm -v ${PWD}:/usr/src/app ruby:2.4 bash`
+```bash
+docker run -it --rm -v ${PWD}:/usr/src/app ruby:2.4 bash
+```
 
 This command starts up a container running Ruby and puts us right into it at a bash prompt. In this example, our container will be running Ruby 2.4, as the container was created using the official Ruby 2.4 image from [Docker Hub](https://hub.docker.com/_/ruby/). But we can specify whatever version you want.
 
@@ -31,13 +33,15 @@ Now, while we are in the container, we can install rails.
 
 **Install Rails:**
 
-`gem install rails`
+```bash
+gem install rails
+```
 
 And with that, we can create a rails app.
 
 **Create rails app:**
 
-```
+```bash
 cd /usr/src/app
 rails new myapp --skip-test --skip-bundle --database=postgresql
 ```
@@ -48,108 +52,123 @@ So far we’ve been working _inside_ the container. Let’s get out of there.
 
 **Exit the container:**
 
-`exit`
+```bash
+exit
+```
 
 Even though we created the Rails project while we were inside the container, you will notice that we can see the code after we exited. Our code stays locally and when we start a container it’s mounted inside.
 
 **Change directory into your app:**
 
-`cd myapp`
+```bash
+cd myapp
+```
 
 The Ruby image we used got us started. But we need to actually build the image - based on that same Ruby image - with everything we need to run our application. The nuts and bolts of this isn’t so important right now. But what we need is a Dockerfile.
 
 **Create a Dockerfile**. Here is a good starter one:
 
-```
+```docker
 FROM ruby:2.7
 LABEL maintainer="your-email-goes-here"
 
 # Ensure we install an up-to-date version of Node
+
 # See https://github.com/yarnpkg/yarn/issues/2888
+
 RUN curl -sL https://deb.nodesource.com/setup_13.x | bash -
 
 # Ensure latest packages for Yarn
+
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | \
-  tee /etc/apt/sources.list.d/yarn.list
+ tee /etc/apt/sources.list.d/yarn.list
 
 # Install packages
-RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
-  nodejs \
-  yarn
 
-COPY Gemfile* /usr/src/app/
+RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
+ nodejs \
+ yarn
+
+COPY Gemfile\* /usr/src/app/
 WORKDIR /usr/src/app
 RUN bundle install
 
 COPY . /usr/src/app/
 
 CMD ["bin/rails", "s", "-b", "0.0.0.0"]
+
 ```
 
 And we’ll need to update our database configuration.
 
 **Update database.yml**
 
-```
+```docker
 default: &default
-  adapter: postgresql
-  encoding: unicode
-  host: database
-  username: postgres
-  password: some-long-password
-  database: myapp_development
-  pool: 5
-  variables:
-    statement_timeout: 5000
+adapter: postgresql
+encoding: unicode
+host: database
+username: postgres
+password: some-long-password
+database: myapp_development
+pool: 5
+variables:
+statement_timeout: 5000
 
 development:
-  <<: *default
+<<: \*default
 
 test:
-  <<: *default
-  database: myapp_test
+<<: \*default
+database: myapp_test
 
 production:
-  <<: *default
+<<: \*default
+
 ```
 
 Now we can build our docker image.
 
 **Build a docker image:**
 
-`docker build .`
+```bash
+docker build .
+```
 
 Our application is actually made up of different services, so we need to describe them. We have our “web” service that consists of our running Rails application. And we’ll need a separate “database” service for the postgres database (as it’ll be running in its own container). This is where the docker-compose.yml file comes in.
 
 **Create a docker-compose.yml file:**
 
-```
+```docker
 version: "3"
 
 services:
-  web:
-    build: .
-    ports:
-      - "3000:3000"
-    volumes:
-      - .:/usr/src/app
+web:
+build: .
+ports: - "3000:3000"
+volumes: - .:/usr/src/app
 
-  database:
-    image: postgres
+database:
+image: postgres
+
 ```
 
 If you are curious why the database service is so simply stated, it’s because we don’t need to build anything. It is grabbing the official postgres image from Docker Hub. The image has everything it needs for us to launch a database container. Rails already knows the port.
 
 To create our development database, we need to launch the database container first:
 
-`docker-compose up -d database`
+```bash
+docker-compose up -d database
+```
 
 The -d flag allows the container to run in the background - “detached” mode, to be specific - so we don’t see any output.
 
 Now, with postgres running, we can use Rails create the database:
 
-`docker-compose run --rm web bin/rails db:create`
+```bash
+docker-compose run --rm web bin/rails db:create
+```
 
 There are two parts to this command: a Docker part and a Rails part. The Docker part - `docker-compose run --rm web` - is launching our “web” container but will delete the container (the "--rm" part) as soon as the command runs. The rest of the command — `bin/rails db:create` - is the Rails command to create the database.
 
@@ -157,7 +176,9 @@ With the database created, we can now start up the web container.
 
 **Start it up:**
 
-`docker-compose up`
+```bash
+docker-compose up
+```
 
 This command starts up all the services listed in your docker-compose.yml file.
 
@@ -167,23 +188,33 @@ That’s pretty much it. Our Rails app should be running locally at http://local
 
 When you want to get your services running:
 
-`docker-compose up`
+```bash
+docker-compose up
+```
 
 When you want to get your services running, but OK to run in the background:
 
-`docker-compose up -d`
+```bash
+docker-compose up -d
+```
 
 Check to see if you have any containers running:
 
-`docker-compose ps`
+```bash
+docker-compose ps
+```
 
 When you want to stop your services:
 
-`docker-compose stop`
+```bash
+docker-compose stop
+```
 
 Run a one-off rails command and delete the container after completion:
 
-`docker-compose run --rm web bin/rails db:migrate`
+```bash
+docker-compose run --rm web bin/rails db:migrate
+```
 
 **Epilogue**
 
